@@ -220,7 +220,7 @@ socket.on('listening', () => {
   console.log("socket listening on " + addr.address + ":" + addr.port)
 })
 
-socket.bind(getConfig("port"), () => {
+socket.bind({ "port" : getConfig("port"), "address" : "ff02::1%" + getConfig("mcast_iface")}, () => {
   console.log(getConfig("listen"))
   socket.addMembership(getConfig("mcast_group"), getConfig("listen"))
   myproc.setgid('nogroup')
