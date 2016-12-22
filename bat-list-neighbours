@@ -4,8 +4,16 @@ const fs = require('fs')
 const netIfaces = require('os').networkInterfaces()
 
 var batIface = "bat0"
+
+if (process.argv.length > 2) {
+  configFile = process.argv[2]
+}
+else {
+  configFile = "./config.json"
+}
+
 try {
-  var c = JSON.parse(fs.readFileSync("./config.json")).bat_iface
+  var c = JSON.parse(fs.readFileSync(configFile)).bat_iface
   if (c != null) batIface = c.replace(/[^A-Za-z0-9\-_\.]/g, '')
 } catch (ignored) {
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const dgram = require('dgram')
-const socket = dgram.createSocket('udp6')
+const socket = dgram.createSocket({'type' : 'udp6', 'reuseAddr' : true})
 const fs = require('fs')
 const zlib = require('zlib')
 const os = require('os')
@@ -40,7 +40,7 @@ function getNodeinfo() {
     "system": {
       "site_code": getConfig("site_code")
     },
-    "hostname": os.hostname(),
+    "hostname": os.hostname() + "_" + getConfig("site_code"),
     "hardware": {
       "model": os.cpus()[0].model,
       "nproc": os.cpus().length
@@ -66,7 +66,7 @@ function getStatistics() {
 
 function getNeighbours() {
   return {
-    "batadv": JSON.parse(evalExec("sudo ./bat-list-neighbours"))
+    "batadv": JSON.parse(evalExec("sudo ./bat-list-neighbours " + configFile))
   }
 }
 
@@ -172,9 +172,14 @@ function getData(what) {
 }
 
 var config = {}
-
+if (myproc.argv.length > 2) {
+  configFile = myproc.argv[2]
+}
+else {
+  configFile = "./config.json"
+}
 try {
-  config = JSON.parse(fs.readFileSync("./config.json"))
+  config = JSON.parse(fs.readFileSync(configFile))
 } catch (err) {
   console.log("no config file found")
 }
@@ -216,6 +221,7 @@ socket.on('listening', () => {
 })
 
 socket.bind(getConfig("port"), () => {
+  console.log(getConfig("listen"))
   socket.addMembership(getConfig("mcast_group"), getConfig("listen"))
   myproc.setgid('nogroup')
   myproc.setuid('nobody')
